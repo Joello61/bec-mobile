@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode - Format RGB sans rgb() */
+    --color-primary: 0 105 92;        /* #00695c */
+    --color-primary-dark: 0 77 64;    /* #004d40 */
+    --color-primary-light: 38 166 154; /* #26a69a */
+    
+    --color-secondary: 255 179 0;     /* #ffb300 */
+    --color-secondary-dark: 255 143 0; /* #ff8f00 */
+    --color-secondary-light: 255 213 79; /* #ffd54f */
+    
+    --color-accent: 244 81 30;        /* #f4511e */
+    --color-info: 13 71 161;          /* #0d47a1 */
+    
+    /* Couleurs sémantiques light mode */
+    --color-background: 255 255 255;  /* Blanc */
+    --color-surface: 245 245 245;     /* gray-50 */
+    --color-text: 33 33 33;           /* gray-900 */
+    --color-text-secondary: 117 117 117; /* gray-500 */
+    --color-border: 224 224 224;      /* gray-200 */
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* Dark Mode - Mêmes noms de variables, valeurs différentes */
+      --color-primary: 38 166 154;      /* primary-light en dark mode */
+      --color-primary-dark: 0 77 64;
+      --color-primary-light: 77 182 172;
+      
+      --color-secondary: 255 213 79;    /* secondary-light en dark mode */
+      --color-secondary-dark: 255 179 0;
+      --color-secondary-light: 255 235 156;
+      
+      --color-accent: 255 112 67;       /* accent-light en dark mode */
+      --color-info: 25 118 210;         /* info-light en dark mode */
+      
+      /* Couleurs sémantiques dark mode */
+      --color-background: 18 18 18;     /* Presque noir */
+      --color-surface: 30 30 30;        /* gray-800 équivalent */
+      --color-text: 255 255 255;        /* Blanc */
+      --color-text-secondary: 158 158 158; /* gray-400 */
+      --color-border: 66 66 66;         /* gray-700 */
+    }
+  }
+}

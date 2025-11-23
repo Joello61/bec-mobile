@@ -1,0 +1,219 @@
+import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import { voyagesApi } from '@/lib/api/voyages';
+import { storage, STORAGE_KEYS } from '@/lib/utils/storage';
+import type { 
+  Voyage, 
+  CreateVoyageInput, 
+  UpdateVoyageInput, 
+  VoyageFilters, 
+  VoyageStatut,
+  PaginationMeta, 
+  PublicVoyage
+} from '@/types';
+import { VOYAGE_STATUTS } from '../utils/constants';
+
+interface VoyageState {
+  voyages: Voyage[];
+  publicVoyages: PublicVoyage[];
+  mesVoyages: Voyage[];
+  currentVoyage: Voyage | null;
+  pagination: PaginationMeta | null;
+  isLoading: boolean;
+  error: string | null;
+  
+  // Actions
+  fetchVoyages: (page?: number, limit?: number, filters?: VoyageFilters) => Promise<void>;
+  fetchPublicVoyages: (page?: number, limit?: number, filters?: VoyageFilters) => Promise<void>;
+  fetchVoyage: (id: number) => Promise<void>;
+  createVoyage: (data: CreateVoyageInput) => Promise<Voyage>;
+  updateVoyage: (id: number, data: UpdateVoyageInput) => Promise<void>;
+  updateStatus: (id: number, statut: VoyageStatut) => Promise<void>;
+  deleteVoyage: (id: number) => Promise<void>;
+  fetchUserVoyages: (userId: number) => Promise<void>;
+  clearError: () => void;
+  reset: () => void;
+}
+
+// ⚠️ ADAPTATION REACT NATIVE : AsyncStorage au lieu de localStorage
+export const useVoyageStore = create<VoyageState>()(
+  persist(
+    (set, get) => ({
+      voyages: [],
+      publicVoyages: [],
+      mesVoyages: [],
+      currentVoyage: null,
+      pagination: null,
+      isLoading: false,
+      error: null,
+
+      fetchVoyages: async (page = 1, limit = 10, filters) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await voyagesApi.list(page, limit, filters);
+          set({ 
+            voyages: response.data, 
+            pagination: response.pagination,
+            isLoading: false 
+          });
+        } catch (error: any) {
+          set({ 
+            error: error.message || 'Erreur lors du chargement des voyages', 
+            isLoading: false 
+          });
+        }
+      },
+
+      fetchPublicVoyages: async (page = 1, limit = 10, filters) => {
+        set({ isLoading: true, error: null });
+        try {
+          const response = await voyagesApi.publicList(page, limit, filters);
+          set({ 
+            publicVoyages: response.data, 
+            pagination: response.pagination,
+            isLoading: false 
+          });
+        } catch (error: any) {
+          set({ 
+            error: error.message || 'Erreur lors du chargement des voyages publics', 
+            isLoading: false 
+          });
+        }
+      },
+
+      fetchVoyage: async (id) => {
+        set({ isLoading: true, error: null });
+        try {
+          const voyage = await voyagesApi.show(id);
+          set({ currentVoyage: voyage, isLoading: false });
+        } catch (error: any) {
+          set({ 
+            error: error.message || 'Erreur lors du chargement du voyage', 
+            isLoading: false 
+          });
+        }
+      },
+
+      createVoyage: async (data) => {
+        set({ isLoading: true, error: null });
+        try {
+          const voyage = await voyagesApi.create(data);
+          set((state) => ({ 
+            mesVoyages: [voyage, ...state.mesVoyages],
+            isLoading: false 
+          }));
+          return voyage;
+        } catch (error: any) {
+          set({ 
+            error: error.message || 'Erreur lors de la création du voyage', 
+            isLoading: false 
+          });
+          throw error;
+        }
+      },
+
+      updateVoyage: async (id, data) => {
+        set({ isLoading: true, error: null });
+        try {
+          const updatedVoyage = await voyagesApi.update(id, data);
+          set((state) => ({
+            mesVoyages: state.mesVoyages.map((v) => v.id === id ? updatedVoyage : v),
+            currentVoyage: state.currentVoyage?.id === id ? updatedVoyage : state.currentVoyage,
+            isLoading: false
+          }));
+        } catch (error: any) {
+          set({ 
+            error: error.message || 'Erreur lors de la mise à jour du voyage', 
+            isLoading: false 
+          });
+          throw error;
+        }
+      },
+
+      updateStatus: async (id, statut) => {
+        set({ isLoading: true, error: null });
+        try {
+          const updatedVoyage = await voyagesApi.updateStatus(id, statut);
+          set((state) => ({
+            mesVoyages: state.mesVoyages.map((v) => v.id === id ? updatedVoyage : v),
+            currentVoyage: state.currentVoyage?.id === id ? updatedVoyage : state.currentVoyage,
+            isLoading: false
+          }));
+        } catch (error: any) {
+          set({ 
+            error: error.message || 'Erreur lors de la mise à jour du statut', 
+            isLoading: false 
+          });
+          throw error;
+        }
+      },
+
+      deleteVoyage: async (id) => {
+        set({ isLoading: true, error: null });
+        try {
+          await voyagesApi.delete(id);
+          set((state) => ({
+            mesVoyages: state.mesVoyages.map((v) =>
+              v.id === id ? { ...v, status: VOYAGE_STATUTS[3]} : v
+            ),
+            currentVoyage:
+              state.currentVoyage?.id === id
+                ? { ...state.currentVoyage, status: VOYAGE_STATUTS[3] }
+                : state.currentVoyage,
+            isLoading: false
+          }));
+        } catch (error: any) {
+          set({ 
+            error: error.message || 'Erreur lors de la suppression du voyage', 
+            isLoading: false 
+          });
+          throw error;
+        }
+      },
+
+      fetchUserVoyages: async (userId) => {
+        set({ isLoading: true, error: null });
+        try {
+          const voyages = await voyagesApi.byUser(userId);
+          set({ mesVoyages: voyages, isLoading: false });
+        } catch (error: any) {
+          set({ 
+            error: error.message || 'Erreur lors du chargement des voyages', 
+            isLoading: false 
+          });
+        }
+      },
+
+      clearError: () => set({ error: null }),
+      
+      reset: () => set({ 
+        voyages: [], 
+        publicVoyages: [],
+        mesVoyages: [],
+        currentVoyage: null, 
+        pagination: null, 
+        error: null 
+      }),
+    }),
+    {
+      name: STORAGE_KEYS.VOYAGE_STORE,
+      storage: createJSONStorage(() => ({
+        getItem: async (name: string) => {
+          const value = await storage.getItem(name);
+          return value;
+        },
+        setItem: async (name: string, value: string) => {
+          await storage.setItem(name, value);
+        },
+        removeItem: async (name: string) => {
+          await storage.removeItem(name);
+        },
+      })),
+      // ⚠️ Persister seulement mesVoyages
+      partialize: (state) => ({
+        mesVoyages: state.mesVoyages,
+        currentVoyage: state.currentVoyage,
+      }),
+    }
+  )
+);

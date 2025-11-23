@@ -1,36 +1,41 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import '../global.css';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import { useColorScheme } from '@/lib/hooks/useColorScheme';
 
-import { useColorScheme } from '@/components/useColorScheme';
+// Import des variantes de la police Inter
+import {
+  Inter_300Light,
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from '@expo-google-fonts/inter';
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+// Import du header personnalisé
+import AppHeader from '@/components/layout/AppHeader';
 
-export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: '(tabs)',
-};
+// ✅ AJOUT : Import du ToastProvider
+import { ToastProvider } from '@/components/ui/Toast';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Empêche l'écran de démarrage de disparaître avant le chargement des polices
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
-  });
+  const colorScheme = useColorScheme();
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+  // Chargement des polices
+  const [loaded] = useFonts({
+    Inter: Inter_400Regular,
+    'Inter-Light': Inter_300Light,
+    'Inter-Medium': Inter_500Medium,
+    'Inter-SemiBold': Inter_600SemiBold,
+    'Inter-Bold': Inter_700Bold,
+  });
 
   useEffect(() => {
     if (loaded) {
@@ -42,18 +47,52 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-      </Stack>
-    </ThemeProvider>
+    // ✅ AJOUT : Envelopper avec ToastProvider
+    <ToastProvider>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack
+          screenOptions={{
+            // Header personnalisé global
+            header: (props) => <AppHeader />,
+            // Animation de navigation
+            animation: 'slide_from_right',
+          }}
+        >
+          {/* Les tabs n'ont pas de header (géré par le header global) */}
+          <Stack.Screen 
+            name="(tabs)" 
+            options={{ 
+              headerShown: true, // Afficher le header global
+            }} 
+          />
+          
+          {/* ✅ AJOUT : Route pour le groupe (auth) */}
+          <Stack.Screen 
+            name="(auth)" 
+            options={{ 
+              headerShown: false, // Pas de header pour les pages d'authentification
+            }} 
+          />
+          
+          {/* ✅ AJOUT : Route pour le groupe (protected) */}
+          <Stack.Screen 
+            name="(protected)" 
+            options={{ 
+              headerShown: true, // Header pour les pages protégées
+            }} 
+          />
+          
+          {/* Page 404 */}
+          <Stack.Screen 
+            name="+not-found"
+            options={{
+              headerShown: true,
+              header: () => <AppHeader title="Page introuvable"/>,
+            }}
+          />
+        </Stack>
+      </ThemeProvider>
+    </ToastProvider>
   );
 }

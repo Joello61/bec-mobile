@@ -21,6 +21,17 @@ expo-env.d.ts
 # Metro
 .metro-health-check*
 
+# Expo EAS
+.eas/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# macOS
+.DS_Store
+
 # debug
 npm-debug.*
 yarn-debug.*
