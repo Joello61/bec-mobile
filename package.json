@@ -64,6 +64,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.0",
+    "@types/react-native-event-source": "^1.1.2",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
     "eslint": "^9.39.1",
