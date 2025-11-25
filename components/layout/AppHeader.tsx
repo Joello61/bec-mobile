@@ -63,7 +63,7 @@ export default function AppHeader({ title }: AppHeaderProps) {
           >
             {/* Logo - Remplacez par votre vraie image */}
             <View className="w-9 h-9 bg-primary rounded-lg items-center justify-center">
-              <Text className="text-white font-bold text-lg">B</Text>
+              <Text className="text-white font-bold text-lg">CB</Text>
             </View>
             {/* Optionnel: Nom de l'app à côté du logo sur les grands écrans */}
             <Text className="ml-2 font-heading font-bold text-primary text-base">

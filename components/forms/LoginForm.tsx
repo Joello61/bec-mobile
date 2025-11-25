@@ -56,6 +56,12 @@ export default function LoginForm({ onSubmit, children }: LoginFormProps) {
     primary: isDark ? Colors.secondary.light : Colors.primary.DEFAULT,
   };
 
+  const styles = {
+      separatorLine: isDark ? Colors.gray[700] : Colors.gray[200],
+      separatorBg: isDark ? Colors.dark.surface : Colors.gray[50], // Doit matcher le fond de l'écran
+      separatorText: isDark ? Colors.gray[400] : Colors.gray[500],
+    };
+
   // Helper pour le toggle mot de passe
   const PasswordToggle = () => (
     <TouchableOpacity 
@@ -172,8 +178,9 @@ export default function LoginForm({ onSubmit, children }: LoginFormProps) {
           </Button>
         </View>
 
-        {/* Séparateur */}
-        <View style={{ position: 'relative', paddingVertical: 24 }}>
+        {/* Séparateur avec style dynamique pour le Dark Mode */}
+        <View style={{ position: 'relative', marginTop: 28, marginBottom: 10 }}>
+          {/* La ligne */}
           <View 
             style={{ 
               position: 'absolute', 
@@ -181,19 +188,20 @@ export default function LoginForm({ onSubmit, children }: LoginFormProps) {
               left: 0, 
               right: 0, 
               height: 1, 
-              backgroundColor: colors.border,
+              backgroundColor: styles.separatorLine,
             }} 
           />
+          {/* Le texte sur fond opaque */}
           <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
             <Text 
               style={{ 
                 paddingHorizontal: 16, 
-                backgroundColor: colors.surface,
+                backgroundColor: styles.separatorBg, // Utilise le fond dynamique
                 fontSize: 14,
-                color: colors.textSecondary,
+                color: styles.separatorText,
               }}
             >
-              Pas encore de compte ?
+              Déjà un compte ?
             </Text>
           </View>
         </View>

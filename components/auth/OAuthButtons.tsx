@@ -66,14 +66,14 @@ export default function OAuthButtons() {
           />
         </View>
         
-        {/* Décommentez pour activer Facebook */}
-        {/* <View style={{ flex: 1 }}>
+        {/* Facebook */}
+        <View style={{ flex: 1 }}>
           <FacebookSignInButton 
             onPress={handleFacebookAuth}
             isLoading={isFacebookLoading}
             disabled={isGoogleLoading}
           />
-        </View> */}
+        </View>
       </View>
 
       {/* Séparateur "Ou continuez avec" */}
